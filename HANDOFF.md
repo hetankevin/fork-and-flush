@@ -21,11 +21,18 @@ selector, installation tooling, examples, attribution, MIT license, and CI.
 - 12 standard-library unit tests pass locally, including budget conservation
   across rounding, maximization/minimization, regressions, failed branches,
   malformed evidence, incumbent ties, and install/update preservation.
-- Skill frontmatter validation and remote installation checks are pending.
+- Bundled skill validator passes. Planner and synthetic selection CLI examples pass.
+- GitHub Actions passes on macOS and Linux with Python 3.9 and 3.13.
+- Both requested hosts have matching Codex and Claude Code skill contents.
+- Codex app-server discovery confirms the skill is enabled at user scope on
+  both hosts. Claude Code installation is verified by file contents, not a live
+  model invocation.
+- Public repository: https://github.com/hetankevin/fork-and-flush
 - No live autoresearch benchmark or paid multi-agent run has been executed.
 
 ## Next steps
 
-Finish validation, publish the repository, install on both requested hosts, and
-verify installed content. Record completed results here. Future improvements
-should be driven by real host behavior or measured benchmark runs.
+Requested implementation, publication, and installations are complete. No
+required work remains. Future improvements should be driven by real host
+behavior or measured benchmark runs. Preserve the distinction between unit
+validation and an end-to-end autoresearch performance evaluation.
