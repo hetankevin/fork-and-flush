@@ -33,7 +33,9 @@ A subagent compared the current skill with Sections 2/4/5.1 and Appendices D/I,
 including PDF prompt blocks omitted from the HTML. It found the core algorithm
 consistent and confirmed that missing counters no longer block native subagents.
 Both findings were addressed: preserve accumulated workspace when materializing
-submission files, and separate results at B from overshoot discoveries.
+submission files, and separate results at B from overshoot discoveries. The
+reviewer reread the fixes and found no remaining blocker or material fidelity
+issue.
 Estimated accounting remains an explicit approximation of the paper's measured
 credits. No performance reproduction is claimed.
 
@@ -50,10 +52,10 @@ only repository documentation.
   across rounding, maximization/minimization, regressions, failed branches,
   malformed evidence, incumbent ties, and install/update preservation.
 - Bundled skill validator passes. Planner and synthetic selection CLI examples pass.
-- Budget revision fea76ce passed all four GitHub Actions jobs on macOS/Linux
-  with Python 3.9/3.13 (run 38639752952).
+- Reviewed revision 6413a71 passed all four GitHub Actions jobs on macOS/Linux
+  with Python 3.9/3.13 (run 38648005492).
 - All four Codex/Claude Code installations have been updated and their contents
-  verified against the budget revision. Previous installs were backed up.
+  verified against the reviewed soft-budget revision. Previous installs were backed up.
 - The 14 tests also pass on the Linux installation host.
 - Codex app-server discovery confirms the skill is enabled at user scope on
   both hosts. Claude Code installation is verified by file contents, not a live
@@ -63,6 +65,7 @@ only repository documentation.
 
 ## Next steps
 
-Validate and publish the estimated-budget revision and review fixes, then update
-all four installations and the release archive. Existing verification above
-refers to the prior budget revision until this rollout completes.
+The reviewed soft-budget revision is pushed, verified, and installed in all
+four requested locations. The v0.2.1 archive packages the same skill. Existing
+agent sessions that already read the old instructions should reread SKILL.md
+and references/budgets.md. No required implementation work remains.
