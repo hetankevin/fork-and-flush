@@ -22,9 +22,9 @@ class ScheduleTests(unittest.TestCase):
 
     def test_budget_conservation_across_rounding(self):
         for budget in range(100, 300):
-            result = control.plan(budget, overhead=17)
+            result = control.plan(budget)
             phases = result["phases"]
-            self.assertEqual(sum(p["allocation"] for p in phases) + 17, budget)
+            self.assertEqual(sum(p["allocation"] for p in phases), budget)
             for first, second in zip(phases, phases[1:]):
                 self.assertEqual(first["end"], second["start"])
             for phase in phases:
@@ -32,9 +32,26 @@ class ScheduleTests(unittest.TestCase):
                 self.assertGreater(phase["per_worker"], 0)
 
     def test_reject_impossible_budgets(self):
-        for args in [(0,), (10,), (100, 100), (100, -1), (1000, 0, 6), (True,), (10.5,)]:
+        for args in [(0,), (10,), (100, 100), (100, -1), (1000, 6), (True,), (10.5,)]:
             with self.subTest(args=args), self.assertRaises(ValueError):
                 control.plan(*args)
+
+    def test_token_and_cost_budgets_keep_full_B(self):
+        for unit, budget in [("credits", 10000), ("tokens", 1000000),
+                             ("cost-microusd", 100000000)]:
+            with self.subTest(unit=unit):
+                result = control.plan(budget, unit=unit)
+                self.assertEqual(result["budget_unit"], unit)
+                self.assertEqual(result["search_budget"], budget)
+                self.assertEqual(sum(p["allocation"] for p in result["phases"]), budget)
+                self.assertEqual([p["start"] for p in result["phases"][::2]],
+                                 [0, budget * 33 // 100, budget * 66 // 100])
+                self.assertEqual(result["phases"][0]["per_worker"], budget * 6 // 100)
+
+    def test_non_model_usage_units_are_rejected(self):
+        for unit in ("minutes", "seconds", "evaluations", "high", "usd"):
+            with self.subTest(unit=unit), self.assertRaises(ValueError):
+                control.plan(1000, unit=unit)
 
     def test_flush_only_is_explicit(self):
         result = control.plan(1000, branches=1)

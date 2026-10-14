@@ -13,13 +13,12 @@ def integer(value, name, minimum=0):
     return value
 
 
-def plan(budget, overhead=0, branches=4):
+def plan(budget, branches=4, unit="credits"):
     integer(budget, "budget", 1)
-    integer(overhead, "overhead")
     integer(branches, "branches", 1)
-    search = budget - overhead
-    if search <= 0:
-        raise ValueError("overhead must be smaller than the total budget")
+    if unit not in ("credits", "tokens", "cost-microusd"):
+        raise ValueError("unit must be credits, tokens, or cost-microusd")
+    search = budget
     per_branch = search * 6 // 100
     if per_branch < 1:
         raise ValueError("budget is too small for a 6% branch allocation")
@@ -36,9 +35,10 @@ def plan(budget, overhead=0, branches=4):
         phases.append(dict(kind="exploit", round=round_id, start=explore_end,
                            end=end, workers=1, per_worker=end - explore_end,
                            allocation=end - explore_end, fresh_context=False))
-    return dict(schema_version=1, total_budget=budget, overhead_reserve=overhead,
+    return dict(schema_version=2, total_budget=budget, budget_unit=unit,
                 search_budget=search, branches=branches,
-                note="Offsets are aggregate search spend, excluding the overhead reserve.",
+                note="Offsets are aggregate metered model usage across all search workers. "
+                     "Allocations are enforced by the coordinator at episode boundaries.",
                 phases=phases)
 
 
@@ -95,8 +95,10 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
     planning = commands.add_parser("plan", help="plan aggregate search allocations")
-    planning.add_argument("--budget", type=int, required=True)
-    planning.add_argument("--overhead", type=int, default=0)
+    planning.add_argument("--budget", type=int, required=True,
+                          help="total model-usage budget B, in integer units")
+    planning.add_argument("--unit", choices=("credits", "tokens", "cost-microusd"),
+                          default="credits", help="metered budget unit (default: credits)")
     planning.add_argument("--branches", type=int, default=4)
     selection = commands.add_parser("select", help="rank independently verified checkpoint records")
     selection.add_argument("records", type=Path)
@@ -104,7 +106,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         if args.command == "plan":
-            result = plan(args.budget, args.overhead, args.branches)
+            result = plan(args.budget, args.branches, args.unit)
         else:
             result = select(json.loads(args.records.read_text()), args.direction)
     except (ValueError, OSError) as exc:

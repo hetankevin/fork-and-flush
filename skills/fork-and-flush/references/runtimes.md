@@ -58,7 +58,14 @@ waves with no sibling communication. This preserves K candidates and total
 allocations but changes parallel wall time. Report the deviation. Reduce K only
 with an explicit run configuration and replan the budget. K=1 is flush-only.
 
-A skills file cannot impose a hard cost cap on an unmetered host. Use available
-host limits, cancellation, and measured usage. If only evaluator counts are
-observable, call that a proxy and separately bound agent runtime. Never promise
-a token or dollar ceiling the runtime cannot enforce.
+Before dispatch, verify that the host reports input/output usage or token-derived
+cost and can bound episodes outside worker prompts. Retain authoritative usage
+records for every session and retry. If the host lacks this capability, stop
+before launching a budgeted search and explain the missing capability. Do not
+fall back to evaluator counts, elapsed time, or the worker's token estimate.
+See [budget accounting](budgets.md) for the metering contract.
+
+A user-requested operational timeout can still cancel a hung process, but it
+neither spends compute credits nor replaces the allocation. Record such a run
+as interrupted and report its actual metered usage. Do not promise an exact
+hard cost ceiling if bounded in-flight episodes can overshoot it.

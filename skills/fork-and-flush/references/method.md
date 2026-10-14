@@ -14,30 +14,36 @@ continued execution of the winner. Each lineage is valued by its best attained
 score. The final output retains the best result across the whole run.
 
 The default planner uses four workers and starts rounds at 0%, 33%, and 66% of
-aggregate search spend, allocating 6% to each worker per round. Between rounds,
+aggregate model-usage budget B, allocating 6% to each worker per round. Between rounds,
 one winner continues. Integer rounding is downward and remaining units go to
-exploitation. A 1,000-unit search allowance therefore has exploration costs of
-240 units each and exploitation allocations of 90, 90, and 100 units. This is
+exploitation. A 10,000-credit search budget therefore has exploration costs of
+2,400 credits each and exploitation allocations of 900, 900, and 1,000 credits. This is
 a concrete discretization of the paper's approximate schedule, not a claim that
 those integers reproduce its harness.
 
 | Aspect | This implementation |
 | --- | --- |
 | Existing code | May begin from a user's project rather than an empty research workspace |
-| Metering | Explicit overhead reserve and host metering, or disclosed proxy budgets |
-| Worker brief | Includes resource limits for practical enforcement |
+| Metering | Host-metered token-derived credits/cost, or explicitly normalized raw tokens; full B is scheduled |
+| Worker brief | No total, allocated, consumed, or remaining compute budgets, as in Appendix I |
 | Selection | Independently verified records, explicit tie rule, inherited incumbent |
 | Scheduling | Integer planning helper, agent-operated dispatch and cancellation |
 | Runtime | Claude/Codex sessions instead of the paper's Copilot CLI harness |
 | Capacity | May run K workers in waves, reported as a scheduling adaptation |
 
-The paper's experimental workers were not told their remaining compute budget.
-This skill's brief supplies limits, so it is a practical adaptation. The paper
-also examined optional branch directives, which are not required here. We do
+The coordinator controls allocations at episode boundaries and keeps budget
+information out of worker prompts, following Sections 2 and 5.1 and Appendix I.
+The paper reports credits as a fixed input/output-token function, approximately
+100 credits per dollar in its experiment. We do not invent its unpublished
+per-token conversion or apply that dollar ratio to other providers. See
+[budget accounting](budgets.md) for the chosen meter and cost/token normalization.
+Elapsed time and evaluator counts do not replace the budget. The paper also
+examined optional branch directives, which are not required here. We do
 not implement the triplet embeddings used to analyze idea basins: those are an
 analysis procedure rather than a prerequisite for the search loop.
 
 There is no claim of reproducing the paper's task results, of guaranteed
 improvement, or of a statistical advantage from this package. Fresh contexts
 can still rediscover the same approach. Workspace notes can also carry prior
-ideas. Noisy evaluations and proxy budgets require explicit experimental design.
+ideas. Noisy evaluations and changes in token weighting require explicit
+experimental design. This package has not reproduced the original harness.

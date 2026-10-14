@@ -16,10 +16,16 @@ run/
 
 The contract should identify the task, baseline, evaluator version and command,
 score direction, validity checks, fixed seeds/repeat aggregation, editable scope,
-model/settings, total budget/unit, overhead reserve, limits, and snapshot policy.
-The append-only ledger records each completed allocation's worker ID, phase,
-actual spend, measurement source, checkpoint IDs, failures, and timestamps.
-Record partial/cancelled allocations too. Do not count inherited work again.
+model and reasoning-effort setting, total search budget B/unit, meter and fixed
+conversion/rates, host episode controls, and snapshot policy. Keep this contract
+out of worker inputs. See [budget accounting](budgets.md).
+The append-only ledger records each episode's worker/session/request ID, phase,
+input/output token categories, token-derived charge, authoritative usage source,
+checkpoint IDs, failures, and timestamps. Preserve partial/cancelled usage too.
+Record actual aggregate trigger positions and any overshoot. Convert cumulative
+session counters into deltas, deduplicate requests, and never count inherited
+usage again. Log coordinator and post-run model costs separately, alongside the
+overall cost total. Solver/evaluator wall time does not consume the model budget.
 
 The selection helper reads this format:
 

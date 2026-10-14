@@ -73,16 +73,23 @@ In **Codex**:
 
 ```text
 $fork-and-flush Optimize this solver using the existing benchmark and correctness
-checks. Use four branches and a total allowance of 100 evaluator calls, including
-10 reserved for verification. Cap each worker at 10 minutes. Return the best
-verified checkpoint and actual resource use.
+checks. Set B to 1,000,000 aggregate input-plus-output model tokens across all
+search workers, including discarded branches and retries. Keep the current model
+and reasoning effort fixed. Use four branches, 6% of B per branch per round, and
+forks at 0%, 33%, and 66% of B. Meter usage in the host at episode boundaries and
+keep budgets out of worker prompts. Return the best verified checkpoint and
+actual usage. Confirm metering before launch and report coordinator costs
+separately.
 ```
 
 In **Claude Code**, use `/fork-and-flush` with the same task details.
 
 The agent establishes a run contract, isolates workspaces, and starts independent
-workers. You need a measurable objective, a fixed evaluator, and a bounded budget.
-Evaluator calls in the example are a practical proxy, not token/cost metering.
+workers. You need a measurable objective, a fixed evaluator, and metered model
+usage. The paper budgets token-derived compute credits. This example explicitly
+chooses raw input-plus-output tokens, which weights usage differently from
+provider costs. [Examples](examples/README.md) also cover credits and dollar
+budgets. Reasoning effort stays fixed and is not the budget unit.
 The skill can also be selected automatically for matching optimization tasks.
 It does not apply to ordinary edits or unscored brainstorming.
 
@@ -96,14 +103,15 @@ It does not apply to ordinary edits or unscored brainstorming.
 | Repeat | Fork again at fixed aggregate-spend milestones |
 | Finish | Re-verify and return the best artifact found anywhere in the run |
 
-The default schedule starts exploration at 0%, 33%, and 66% of the search
-allowance, with 6% per worker per round. All workers count against the global
-budget. With a 1,000-unit search allowance, the three rounds cost 240 units each,
-leaving 90, 90, and 100 units for continued work. An optional overhead reserve is
-subtracted before planning.
+The default schedule starts exploration at 0%, 33%, and 66% of the full search
+budget B, with 6% per worker per round. All workers count against B. With 10,000
+compute credits, each of the three rounds costs 2,400 credits, leaving 900, 900,
+and 1,000 credits for continued work. No overhead deduction changes B. Actual
+usage drives interventions at episode boundaries. Budgets stay in the
+coordinator's contract and are not disclosed in worker or continuation prompts.
 
 ```sh
-python3 skills/fork-and-flush/scripts/control.py plan --budget 1000 --overhead 100
+python3 skills/fork-and-flush/scripts/control.py plan --budget 10000 --unit credits
 python3 skills/fork-and-flush/scripts/control.py select examples/round.json
 ```
 
@@ -119,9 +127,19 @@ or a transcript-preserving conversation fork is not a flush. Workers must not
 share a mutable checkout.
 
 When concurrent slots are limited, the skill can run the same K workers in waves
-from an unchanged snapshot. It reports that adaptation. It also reports proxy
-budgets and any extra context resets. A skill cannot impose a hard token ceiling
-on a host that exposes no metering or cancellation controls.
+from an unchanged snapshot. It reports that adaptation and any extra context
+resets. If the host cannot meter model usage and control episodes, the skill
+prepares a plan and explains the missing capability before launching. It does
+not silently substitute minutes, evaluator counts, or worker token estimates.
+A user-specified operational timeout is separate from the search budget.
+
+See [budget accounting](skills/fork-and-flush/references/budgets.md) for token
+categories, fixed cost rates, episode overshoot, and reporting coordinator costs
+separately. Existing overall user spending caps still apply. The planner's
+`--unit` is `credits` by default, with `tokens` and `cost-microusd` alternatives.
+It accepts integer units: 100,000,000 microdollars represents $100. Schedule
+output is schema version 2; score-record schema remains version 1. The former
+`--overhead` option has been removed so schedule fractions apply to the full B.
 
 The Python helpers plan allocations and rank supplied records. They do **not**
 launch agents, verify measurements, enforce spending, or integrate code. Those
@@ -133,6 +151,7 @@ reproduced here.
 
 - [SKILL.md](skills/fork-and-flush/SKILL.md): the portable procedure and worker brief.
 - [Runtime adapters](skills/fork-and-flush/references/runtimes.md): context boundaries, workspace isolation, resumption, and capacity.
+- [Budget accounting](skills/fork-and-flush/references/budgets.md): metering, cost/token units, episode boundaries, and worker prompts.
 - [Record format](skills/fork-and-flush/references/records.md): contracts, ledgers, artifacts, and score evidence.
 - [Method notes](skills/fork-and-flush/references/method.md): attribution and explicit adaptations.
 - [Examples](examples/README.md): invocation and a synthetic selection example.
