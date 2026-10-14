@@ -4,17 +4,16 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Agent Skills](https://img.shields.io/badge/Agent_Skills-Claude_%26_Codex-7357ff.svg)](skills/fork-and-flush/SKILL.md)
 
-**Keep the workspace. Refresh the context. Continue from the best measured result.**
+A Claude Code and Codex skill implementing
+[Fork-and-Flush: Escaping Idea Basins in Autoresearch Agents](https://arxiv.org/html/2610.07447v1).
+It runs several agents from the same workspace with fresh chat contexts, evaluates
+their results, and continues the best-performing branch under a fixed compute
+budget. It is intended for optimization tasks with a reproducible evaluator.
 
-A portable Claude Code and Codex skill for difficult optimization tasks with a
-reproducible evaluator. It implements the search workflow described in
-[Fork-and-Flush: Escaping Idea Basins in Autoresearch Agents](https://arxiv.org/html/2610.07447v1)
-through fresh-context workers, fixed budget allocations, and verified checkpoint
-selection.
-
-The package includes the agent instructions, runtime adapters, a deterministic
-budget planner, a score selector, and a dependency-free installer. The host agent
-coordinates execution. There is no daemon, API key requirement, or bundled model.
+The host agent runs the search using the included instructions and runtime
+adapters. Python helpers plan budget allocations and select scored checkpoints.
+The installer has no external dependencies. The package requires no additional
+API key and includes no daemon or model.
 
 ```mermaid
 flowchart LR
@@ -69,7 +68,7 @@ the skill on the next turn.
 
 ## Use
 
-In **Codex**:
+In Codex:
 
 ```text
 $fork-and-flush Optimize this solver using the existing benchmark and correctness
@@ -82,7 +81,7 @@ actual usage. Confirm metering before launch and report coordinator costs
 separately.
 ```
 
-In **Claude Code**, use `/fork-and-flush` with the same task details.
+In Claude Code, use `/fork-and-flush` with the same task details.
 
 The agent establishes a run contract, isolates workspaces, and starts independent
 workers. You need a measurable objective, a fixed evaluator, and metered model
@@ -141,7 +140,7 @@ It accepts integer units: 100,000,000 microdollars represents $100. Schedule
 output is schema version 2; score-record schema remains version 1. The former
 `--overhead` option has been removed so schedule fractions apply to the full B.
 
-The Python helpers plan allocations and rank supplied records. They do **not**
+The Python helpers plan allocations and rank supplied records. They do not
 launch agents, verify measurements, enforce spending, or integrate code. Those
 operations belong to the host agent following the skill. No benchmark gains are
 claimed for this package, and the paper's experimental results have not been
@@ -170,8 +169,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [HANDOFF.md](HANDOFF.md).
 
 ## Attribution
 
-The algorithm is due to **Ziyang Cai, Christos Ziakas, Vasilis Kontonis, Tim Pearce,
-Siddhartha Sen, Akshay Krishnamurthy, Shivam Garg, and Dimitris Papailiopoulos**,
+The algorithm is due to Ziyang Cai, Christos Ziakas, Vasilis Kontonis, Tim Pearce,
+Siddhartha Sen, Akshay Krishnamurthy, Shivam Garg, and Dimitris Papailiopoulos,
 *Fork-and-Flush: Escaping Idea Basins in Autoresearch Agents* (2026),
 [arXiv:2610.07447v1](https://arxiv.org/abs/2610.07447v1).
 

@@ -21,6 +21,12 @@ selector, installation tooling, examples, attribution, MIT license, and CI.
 - Fresh contexts only for exploration, same-session continuation for exploitation.
 - Runtime adaptations and unverified performance claims are clearly separated.
 
+## README wording
+
+Removed the opening slogan and rewrote the introduction as a direct description
+of the algorithm. Removed decorative bold from the prose. This change affects
+only repository documentation, so the installed skill files remain current.
+
 ## Verification
 
 - 14 standard-library unit tests pass locally, including explicit token/cost
