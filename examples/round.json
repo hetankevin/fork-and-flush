@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "incumbent": "baseline-001",
+  "records": [
+    {"lineage": "baseline", "checkpoint": "baseline-001", "score": 10.0, "valid": true, "artifact": "demo/baseline", "evidence": "demo/baseline.json"},
+    {"lineage": "worker-a", "checkpoint": "a-best", "score": 14.0, "valid": true, "artifact": "demo/a-best", "evidence": "demo/a-best.json"},
+    {"lineage": "worker-a", "checkpoint": "a-last", "score": 11.0, "valid": true, "artifact": "demo/a-last", "evidence": "demo/a-last.json"},
+    {"lineage": "worker-b", "checkpoint": "b-invalid", "score": 99.0, "valid": false}
+  ]
+}

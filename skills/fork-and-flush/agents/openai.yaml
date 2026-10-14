@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fork and Flush"
+  short_description: "Explore fresh contexts, retain measured progress"
+  default_prompt: "Use $fork-and-flush to optimize this task under a fixed budget with independent branches and a reproducible evaluator."
