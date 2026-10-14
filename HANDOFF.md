@@ -14,18 +14,34 @@ selector, installation tooling, examples, attribution, MIT license, and CI.
 - Default K=4 and three rounds at 0/33/66% of aggregate search allowance.
 - Full model-usage budget B with explicit credits/tokens/cost-microusd units.
   No overhead deduction or time/evaluation-count fallback.
-- Host-metered episodes, budget-free worker prompts, fixed model/reasoning effort.
+- Coordinator-managed soft budgets when host counters/limits are unavailable.
+  Prefer measured usage; otherwise document estimates and uncertainty, with no
+  separate waiver. Budget-free worker prompts and fixed model/reasoning effort.
+- Task-specific selection audits count inside B. Bounded task episodes enable
+  budget decisions without runtime token-limit APIs.
+- Restore canonical submission files without rolling back accumulated workspace.
+  Report results at B separately from overshoot improvements.
 - Integer rounding, best-ever checkpoint retention, invalid-record rejection,
   deterministic incumbent-preserving ties.
 - Planner schema v2 removes --overhead. Score-record schema remains v1.
 - Fresh contexts only for exploration, same-session continuation for exploitation.
 - Runtime adaptations and unverified performance claims are clearly separated.
 
+## Independent paper review
+
+A subagent compared the current skill with Sections 2/4/5.1 and Appendices D/I,
+including PDF prompt blocks omitted from the HTML. It found the core algorithm
+consistent and confirmed that missing counters no longer block native subagents.
+Both findings were addressed: preserve accumulated workspace when materializing
+submission files, and separate results at B from overshoot discoveries.
+Estimated accounting remains an explicit approximation of the paper's measured
+credits. No performance reproduction is claimed.
+
 ## README wording
 
 Removed the opening slogan and rewrote the introduction as a direct description
 of the algorithm. Removed decorative bold from the prose. This change affects
-only repository documentation, so the installed skill files remain current.
+only repository documentation.
 
 ## Verification
 
@@ -47,7 +63,6 @@ only repository documentation, so the installed skill files remain current.
 
 ## Next steps
 
-The budget revision, push, and all four installation updates are complete. The
-v0.2.0 archive packages the verified skill. No required implementation work
-remains. Preserve the distinction between unit validation and an end-to-end
-autoresearch performance evaluation.
+Validate and publish the estimated-budget revision and review fixes, then update
+all four installations and the release archive. Existing verification above
+refers to the prior budget revision until this rollout completes.

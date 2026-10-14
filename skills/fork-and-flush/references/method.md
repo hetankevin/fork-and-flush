@@ -11,7 +11,9 @@ or an endorsed reproduction. No paper figures, code, or prompt text are bundled.
 The preserved mechanism is workspace inheritance with fresh conversational
 contexts at each exploration round, followed by scored branch selection and
 continued execution of the winner. Each lineage is valued by its best attained
-score. The final output retains the best result across the whole run.
+score. The budgeted result retains the best checkpoint across all lineages reached
+within B. Improvements from an episode overrun are retained and reported
+separately, with approximate boundary attribution when accounting is estimated.
 
 The default planner uses four workers and starts rounds at 0%, 33%, and 66% of
 aggregate model-usage budget B, allocating 6% to each worker per round. Between rounds,
@@ -24,15 +26,24 @@ those integers reproduce its harness.
 | Aspect | This implementation |
 | --- | --- |
 | Existing code | May begin from a user's project rather than an empty research workspace |
-| Metering | Host-metered token-derived credits/cost, or explicitly normalized raw tokens; full B is scheduled |
+| Accounting | Token-derived credits/cost or raw tokens; coordinator estimates when counters are absent; full B is scheduled |
 | Worker brief | No total, allocated, consumed, or remaining compute budgets, as in Appendix I |
 | Selection | Independently verified records, explicit tie rule, inherited incumbent |
 | Scheduling | Integer planning helper, agent-operated dispatch and cancellation |
 | Runtime | Claude/Codex sessions instead of the paper's Copilot CLI harness |
 | Capacity | May run K workers in waves, reported as a scheduling adaptation |
 
-The coordinator controls allocations at episode boundaries and keeps budget
+The coordinator manages allocations at episode boundaries and keeps budget
 information out of worker prompts, following Sections 2 and 5.1 and Appendix I.
+The paper used measured credits. When a host lacks usage counters, this skill
+uses documented estimates and soft episode control. That is an accounting
+approximation, not a reproduction of the paper's measured budget. It requires
+no separate waiver in the ordinary skill workflow. The branching and selection
+procedure stays the same. Scientific validity criteria are not relaxed.
+Appendix I's protected-incumbent prompt materializes the best submission at its
+canonical path. This skill likewise preserves the surrounding accumulated
+workspace when restoring submission files. Those prompt blocks are visible in
+the [PDF](https://arxiv.org/pdf/2610.07447v1) but omitted from the HTML rendering.
 The paper reports credits as a fixed input/output-token function, approximately
 100 credits per dollar in its experiment. We do not invent its unpublished
 per-token conversion or apply that dollar ratio to other providers. See

@@ -37,8 +37,8 @@ def plan(budget, branches=4, unit="credits"):
                            allocation=end - explore_end, fresh_context=False))
     return dict(schema_version=2, total_budget=budget, budget_unit=unit,
                 search_budget=search, branches=branches,
-                note="Offsets are aggregate metered model usage across all search workers. "
-                     "Allocations are enforced by the coordinator at episode boundaries.",
+                note="Offsets are aggregate model-usage targets across all search workers. "
+                     "The coordinator manages measured or estimated usage at episode boundaries.",
                 phases=phases)
 
 

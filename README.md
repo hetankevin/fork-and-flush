@@ -75,17 +75,19 @@ $fork-and-flush Optimize this solver using the existing benchmark and correctnes
 checks. Set B to 1,000,000 aggregate input-plus-output model tokens across all
 search workers, including discarded branches and retries. Keep the current model
 and reasoning effort fixed. Use four branches, 6% of B per branch per round, and
-forks at 0%, 33%, and 66% of B. Meter usage in the host at episode boundaries and
-keep budgets out of worker prompts. Return the best verified checkpoint and
-actual usage. Confirm metering before launch and report coordinator costs
-separately.
+forks at 0%, 33%, and 66% of B. Manage usage at episode boundaries, using counters where available
+and documented estimates otherwise. Keep budgets out of worker prompts. Return
+the best verified checkpoint, distinguish estimated from measured usage, and
+report coordinator costs separately. Proceed with a soft budget if the runtime
+lacks counters or enforceable token limits.
 ```
 
 In Claude Code, use `/fork-and-flush` with the same task details.
 
 The agent establishes a run contract, isolates workspaces, and starts independent
-workers. You need a measurable objective, a fixed evaluator, and metered model
-usage. The paper budgets token-derived compute credits. This example explicitly
+workers. You need a measurable objective and a fixed evaluator. The coordinator
+tracks model usage with counters or documented estimates and manages the budget
+itself. The paper budgets token-derived compute credits. This example explicitly
 chooses raw input-plus-output tokens, which weights usage differently from
 provider costs. [Examples](examples/README.md) also cover credits and dollar
 budgets. Reasoning effort stays fixed and is not the budget unit.
@@ -100,13 +102,14 @@ It does not apply to ordinary edits or unscored brainstorming.
 | Select | Rank valid, independently measured checkpoints, including the incumbent |
 | Exploit | Continue the winner with its conversation intact |
 | Repeat | Fork again at fixed aggregate-spend milestones |
-| Finish | Re-verify and return the best artifact found anywhere in the run |
+| Finish | Re-verify the best artifact reached by B across all lineages; report overshoot improvements separately |
 
 The default schedule starts exploration at 0%, 33%, and 66% of the full search
 budget B, with 6% per worker per round. All workers count against B. With 10,000
 compute credits, each of the three rounds costs 2,400 credits, leaving 900, 900,
-and 1,000 credits for continued work. No overhead deduction changes B. Actual
-usage drives interventions at episode boundaries. Budgets stay in the
+and 1,000 credits for continued work. No overhead deduction changes B. Aggregate
+measured or estimated usage drives interventions at episode boundaries. Budgets
+stay in the
 coordinator's contract and are not disclosed in worker or continuation prompts.
 
 ```sh
@@ -116,7 +119,9 @@ python3 skills/fork-and-flush/scripts/control.py select examples/round.json
 
 The selector supports both maximization and minimization, rejects invalid or
 malformed records, preserves an equally good incumbent, and selects the best
-checkpoint rather than the last mutable workspace. [See the examples](examples/README.md).
+checkpoint rather than the last mutable workspace. The coordinator filters
+final records at B and reports any later improvement separately. Estimated
+usage makes that boundary approximate. [See the examples](examples/README.md).
 
 ## Runtime requirements and limits
 
@@ -127,10 +132,12 @@ share a mutable checkout.
 
 When concurrent slots are limited, the skill can run the same K workers in waves
 from an unchanged snapshot. It reports that adaptation and any extra context
-resets. If the host cannot meter model usage and control episodes, the skill
-prepares a plan and explains the missing capability before launching. It does
-not silently substitute minutes, evaluator counts, or worker token estimates.
-A user-specified operational timeout is separate from the search budget.
+resets. If per-worker usage counters or token limits are unavailable, the
+coordinator estimates usage and manages a soft budget through bounded task
+episodes and decisions about when to resume or stop. It states that accounting
+choice and proceeds without asking for a waiver. Estimates carry uncertainty
+and do not establish an enforced billing ceiling. Minutes and evaluator counts
+remain separate resources. A user-specified timeout is an operational guard.
 
 See [budget accounting](skills/fork-and-flush/references/budgets.md) for token
 categories, fixed cost rates, episode overshoot, and reporting coordinator costs

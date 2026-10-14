@@ -16,12 +16,16 @@ run/
 
 The contract should identify the task, baseline, evaluator version and command,
 score direction, validity checks, fixed seeds/repeat aggregation, editable scope,
-model and reasoning-effort setting, total search budget B/unit, meter and fixed
-conversion/rates, host episode controls, and snapshot policy. Keep this contract
+model and reasoning-effort setting, total search budget B/unit, usage source or
+estimation method, fixed conversion/rates, available episode controls, and
+snapshot policy. Keep this contract
 out of worker inputs. See [budget accounting](budgets.md).
 The append-only ledger records each episode's worker/session/request ID, phase,
-input/output token categories, token-derived charge, authoritative usage source,
-checkpoint IDs, failures, and timestamps. Preserve partial/cancelled usage too.
+input/output token categories, token-derived charge, accounting mode (measured,
+estimated, or mixed), source/assumptions, uncertainty, checkpoint IDs, failures,
+and timestamps. Preserve partial/cancelled usage too. Include model-based audits
+that influence selection. Estimates are valid ledger entries, not missing data
+that must block dispatch. Keep their measured components identifiable.
 Record actual aggregate trigger positions and any overshoot. Convert cumulative
 session counters into deltas, deduplicate requests, and never count inherited
 usage again. Log coordinator and post-run model costs separately, alongside the
@@ -55,7 +59,13 @@ The selection helper reads this format:
 Every checkpoint identifier is unique within the selection input. Include the
 inherited incumbent in each round. Include every verified improvement in that
 round, not just final workspace states. For final selection, combine records
-from every round, including pruned lineages. For a first run with no valid
+from every round, including pruned lineages. In the coordinator's evidence, record
+each checkpoint's first verified grading with `cumulative_usage`, `usage_kind`
+(measured, estimated, or mixed), and estimation assumptions/range as applicable.
+Use that aggregate counter to filter the selector's final input at B. The helper
+only ranks supplied records and does not interpret those usage fields. Report
+post-B improvements separately. Estimated classifications must disclose boundary
+uncertainty. Retain the unfiltered ledger and artifacts for provenance. For a first run with no valid
 baseline, omit `incumbent` or set it to null.
 
 A valid score is finite and numeric. `valid` must be a JSON boolean. Artifact

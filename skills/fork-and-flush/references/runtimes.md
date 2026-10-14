@@ -51,21 +51,31 @@ CLAUDE.md files to force a flush.
 
 Keep controller logs outside worker workspaces. Stop workers before selection
 and integration. Do not merge competing solutions together as the selection
-step. Retain each best-scoring artifact separately from the mutable checkout.
+step. Retain each best-scoring artifact separately from the mutable checkout. When
+materializing the winner, restore the canonical submission paths while keeping
+its accumulated experimental files and notes. Avoid a whole-workspace rollback.
 
 If fewer than K worker slots are available, run identical-snapshot workers in
 waves with no sibling communication. This preserves K candidates and total
 allocations but changes parallel wall time. Report the deviation. Reduce K only
 with an explicit run configuration and replan the budget. K=1 is flush-only.
 
-Before dispatch, verify that the host reports input/output usage or token-derived
-cost and can bound episodes outside worker prompts. Retain authoritative usage
-records for every session and retry. If the host lacks this capability, stop
-before launching a budgeted search and explain the missing capability. Do not
-fall back to evaluator counts, elapsed time, or the worker's token estimate.
-See [budget accounting](budgets.md) for the metering contract.
+Inspect available usage counters and host limits, then use what the runtime
+actually exposes. Neither per-worker token accounting nor an enforceable token
+limit is required to start. If counters are absent, estimate usage in the
+coordinator and manage a soft budget using [budget accounting](budgets.md).
+State this choice once and proceed without requesting a waiver. Do not describe
+a documented estimate as measured usage or an enforced billing ceiling.
 
-A user-requested operational timeout can still cancel a hung process, but it
-neither spends compute credits nor replaces the allocation. Record such a run
-as interrupted and report its actual metered usage. Do not promise an exact
-hard cost ceiling if bounded in-flight episodes can overshoot it.
+Without a token-limit API, give each worker a bounded task episode, such as
+implementing and evaluating one candidate or auditing one specified argument.
+Have it return artifacts and a concise report, then decide whether to resume
+that same worker. Reserve estimated usage for running episodes and required
+audits before launching more work. Use cancellation if available and necessary;
+otherwise stop dispatching follow-ups. Do not assume cancellation can recover
+already consumed tokens or guarantee a maximum for an in-flight episode.
+
+Wall-time cancellation is an optional operational guard. Elapsed time and
+submission counts do not become token units. Keep the model-usage budget and
+scientific measurement budget separate, and preserve all requested validity
+requirements when using estimated accounting.
