@@ -28,10 +28,11 @@ selector, installation tooling, examples, attribution, MIT license, and CI.
   across rounding, maximization/minimization, regressions, failed branches,
   malformed evidence, incumbent ties, and install/update preservation.
 - Bundled skill validator passes. Planner and synthetic selection CLI examples pass.
-- Previous release passed GitHub Actions on macOS/Linux with Python 3.9/3.13.
-  The revised budget implementation awaits its post-push CI run.
-- Previous release was installed on both hosts. All four installations need
-  the revised budget implementation after this push.
+- Budget revision fea76ce passed all four GitHub Actions jobs on macOS/Linux
+  with Python 3.9/3.13 (run 38639752952).
+- All four Codex/Claude Code installations have been updated and their contents
+  verified against the budget revision. Previous installs were backed up.
+- The 14 tests also pass on the Linux installation host.
 - Codex app-server discovery confirms the skill is enabled at user scope on
   both hosts. Claude Code installation is verified by file contents, not a live
   model invocation.
@@ -40,6 +41,7 @@ selector, installation tooling, examples, attribution, MIT license, and CI.
 
 ## Next steps
 
-Push the budget revision, update and compare all four installations, check CI,
-and publish the updated skill archive. Preserve the distinction between unit
-validation and an end-to-end autoresearch performance evaluation.
+The budget revision, push, and all four installation updates are complete. The
+v0.2.0 archive packages the verified skill. No required implementation work
+remains. Preserve the distinction between unit validation and an end-to-end
+autoresearch performance evaluation.
